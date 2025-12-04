@@ -118,3 +118,60 @@ fn test_second_day_part_two() {
 
     dbg!(res);
 }
+
+#[test]
+fn test_third_day_part_one() {
+    // const INPUT: &str = "987654321111111\n811111111111119\n234234234234278\n818181911112111";
+
+    const INPUT: &str = include_str!("../input");
+
+    let res = INPUT
+        .split('\n')
+        .filter(|s| !s.is_empty())
+        .fold(0, |sum, s| {
+            sum + s
+                .chars()
+                .map(|c| c.to_digit(10).unwrap())
+                .fold((None, 0), |(best_tens, best), d| match best_tens {
+                    None => (Some(d), best),
+                    Some(t) => {
+                        let cand = t * 10 + d;
+                        (Some(t.max(d)), best.max(cand))
+                    }
+                })
+                .1
+        });
+
+    // assert_eq!(res, 357);
+    dbg!(res);
+}
+
+#[test]
+fn test_third_day_part_two() {
+    // const INPUT: &str = "987654321111111\n811111111111119\n234234234234278\n818181911112111";
+    const INPUT: &str = include_str!("../input");
+
+    let res = INPUT
+        .lines()
+        .filter(|l| !l.is_empty())
+        .map(|l| {
+            let mut drop = l.len() - 12;
+            l.chars()
+                .map(|c| c.to_digit(10).unwrap())
+                .fold(Vec::with_capacity(l.len()), |mut s, d| {
+                    while drop > 0 && s.last().map_or(false, |&x| x < d) {
+                        s.pop();
+                        drop -= 1;
+                    }
+                    s.push(d);
+                    s
+                })
+                .into_iter()
+                .take(12)
+                .fold(0u64, |x, d| x * 10 + d as u64)
+        })
+        .sum::<u64>();
+
+    // assert_eq!(res, 3121910778619);
+    dbg!(res);
+}
