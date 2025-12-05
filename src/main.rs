@@ -3,23 +3,25 @@
 fn main() {}
 
 // #[test]
-// fn test_x_day_part_one() {
+// fn testday_X_part_one() {
+//     const INPUT: &str =
 //     const INPUT: &str = include_str!("../input");
-
 //     let res = unimplemented!();
+//     assert_eq!(res, unimplemented!());
 //     dbg!(res);
 // }
 
 // #[test]
-// fn test_x_day_part_two() {
+// fn test_day_X_part_two() {
+//     const INPUT: &str =
 //     const INPUT: &str = include_str!("../input");
-
 //     let res = unimplemented!();
+//     assert_eq!(res, unimplemented!());
 //     dbg!(res);
 // }
 
 #[test]
-fn test_first_day_part_one() {
+fn test_day_1_part_one() {
     // const INPUT = "L68\nL30\nR48\nL5\nR60\nL55\nL1\nL99\nR14\nL82";
     const INPUT: &str = include_str!("../input");
 
@@ -36,7 +38,7 @@ fn test_first_day_part_one() {
 }
 
 #[test]
-fn test_first_day_part_two() {
+fn test_day_1_part_two() {
     const INPUT: &str = include_str!("../input");
 
     #[rustfmt::skip]
@@ -56,7 +58,7 @@ fn test_first_day_part_two() {
 }
 
 #[test]
-fn test_second_day_part_one() {
+fn test_day_2_part_one() {
     // const INPUT: &str = "11-22,95-115,998-1012,1188511880-1188511890,222220-222224,1698522-1698528,446443-446449,38593856-38593862";
     const INPUT: &str = include_str!("../input");
 
@@ -86,7 +88,7 @@ fn test_second_day_part_one() {
 }
 
 #[test]
-fn test_second_day_part_two() {
+fn test_day_2_part_two() {
     use std::collections::HashSet;
     const INPUT: &str = include_str!("../input");
 
@@ -120,7 +122,7 @@ fn test_second_day_part_two() {
 }
 
 #[test]
-fn test_third_day_part_one() {
+fn test_day_3_part_one() {
     // const INPUT: &str = "987654321111111\n811111111111119\n234234234234278\n818181911112111";
 
     const INPUT: &str = include_str!("../input");
@@ -147,7 +149,7 @@ fn test_third_day_part_one() {
 }
 
 #[test]
-fn test_third_day_part_two() {
+fn test_day_3_part_two() {
     // const INPUT: &str = "987654321111111\n811111111111119\n234234234234278\n818181911112111";
     const INPUT: &str = include_str!("../input");
 
@@ -174,4 +176,105 @@ fn test_third_day_part_two() {
 
     // assert_eq!(res, 3121910778619);
     dbg!(res);
+}
+
+#[test]
+fn test_day_4_part_one() {
+    const INPUT: &str = include_str!("../input");
+
+    let lines: Vec<&[u8]> = INPUT.lines().map(|l| l.as_bytes()).collect();
+    let h = lines.len();
+    let w = lines[0].len();
+    let grid: Vec<u8> = lines.into_iter().flatten().copied().collect();
+
+    const DIRS: [(isize, isize); 8] = [
+        (-1, -1), (-1, 0), (-1, 1),
+        ( 0, -1),          ( 0, 1),
+        ( 1, -1), ( 1, 0), ( 1, 1),
+    ];
+
+    let res = (0..grid.len())
+        .filter(|&idx| {
+            let r = idx / w;
+            let c = idx % w;
+
+            let neighbors = DIRS
+                .iter()
+                .map(|&(dr, dc)| {
+                    let nr = r as isize + dr;
+                    let nc = c as isize + dc;
+
+                    (nr >= 0 && nr < h as isize && nc >= 0 && nc < w as isize
+                        && grid[nr as usize * w + nc as usize] == b'@') as u8
+                })
+                .sum::<u8>();
+
+            matches!(grid[idx], b'@' if neighbors < 4)
+        })
+        .count();
+
+    dbg!(res);
+}
+
+#[test]
+fn test_day_4_part_two() {
+    const INPUT: &str = include_str!("../input");
+
+    let lines: Vec<&[u8]> = INPUT.lines().map(|l| l.as_bytes()).collect();
+    let h = lines.len();
+    let w = lines[0].len();
+    let mut grid: Vec<u8> = lines.into_iter().flatten().copied().collect();
+
+    const DIRS: [(isize, isize); 8] = [
+        (-1, -1), (-1, 0), (-1, 1),
+        ( 0, -1),          ( 0, 1),
+        ( 1, -1), ( 1, 0), ( 1, 1),
+    ];
+
+    let mut total = 0usize;
+
+    loop {
+        let mut removed = 0usize;
+
+        let next: Vec<u8> = (0..grid.len())
+            .map(|idx| {
+                if grid[idx] != b'@' {
+                    return grid[idx];
+                }
+
+                let r = idx / w;
+                let c = idx % w;
+
+                let neighbors = DIRS
+                    .iter()
+                    .map(|&(dr, dc)| {
+                        let nr = r as isize + dr;
+                        let nc = c as isize + dc;
+
+                        (nr >= 0
+                            && nr < h as isize
+                            && nc >= 0
+                            && nc < w as isize
+                            && grid[nr as usize * w + nc as usize] == b'@') as u8
+                    })
+                    .sum::<u8>();
+
+                if neighbors < 4 {
+                    removed += 1;
+                    b'.'
+                } else {
+                    b'@'
+                }
+            })
+            .collect();
+
+        if removed == 0 {
+            break;
+        }
+
+        total += removed;
+        grid = next;
+    }
+
+    dbg!(total);
 }
